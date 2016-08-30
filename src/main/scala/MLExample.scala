@@ -8,38 +8,16 @@ import org.apache.spark.mllib.util.MLUtils
   * Created by ThomasE on 09.03.2016.
   */
 object MLExample {
-
   def main(args: Array[String]) : Unit = {
-
     val conf = new SparkConf().setAppName("Simple Application").setMaster("local")
     val sc = new SparkContext(conf)
-    val data = MLUtils.loadLibSVMFile(sc, "data/mllib/sample_libsvm_data.txt")
-
-    // Split data into training (60%) and test (40%).
-    val splits = data.randomSplit(Array(0.6, 0.4), seed = 11L)
-    val training = splits(0).cache()
-    val test = splits(1)
-
-
-    // Run training algorithm to build the model
-    val numIterations = 100
-    val model = SVMWithSGD.train(training, numIterations)
-
-    // Clear the default threshold.
-    model.clearThreshold()
-
-    // Compute raw scores on the test set.
-    val scoreAndLabels = test.map { point =>
-      val score = model.predict(point.features)
-      (score, point.label)
-    }
-
-    // Get evaluation metrics.
-    val metrics = new BinaryClassificationMetrics(scoreAndLabels)
-    val auROC = metrics.areaUnderROC()
-
-    println("Area under ROC = " + auROC)
-
+    val data = sc.textFile("C:\\Users\\thomase\\Downloads\\ml-100k\\u.user")
+    val fields = data.map(line => line.split('|'))
+    val users = fields.map(f => f(0)).count()
+    val genders = fields.map(f => f(2)).distinct().count()
+    val occupations = fields.map(f =>  f(3)).distinct().count()
+    val zipCodes = fields.map(f => f(4)).distinct().count()
+    printf("Users: %d, genders: %d, occupations: %d, ZIP codes: %d%n", users, genders, occupations, zipCodes)
 
   }
 }
